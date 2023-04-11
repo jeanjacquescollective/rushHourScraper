@@ -80,7 +80,8 @@ def getMetaData(driver, url):
             'latitude': latitude,
             'longitude': longitude
         },
-        'title': title
+        'title': title,
+        'url': url	
     }
     return metaData
 def scrapeWebsite(url):
@@ -101,16 +102,15 @@ def scrapeWebsite(url):
     }
     driver.get(url)
     # bypass cookies
-    try:
-        cookiesDecliner = WebDriverWait(driver, timeout=2).until(lambda b: b.find_element(By.XPATH,"//button[@class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 Nc7WLe']"))
-        cookiesDecliner.click()
-    except:
-        pass
+    # try:
+    #     cookiesDecliner = WebDriverWait(driver, timeout=2).until(lambda b: b.find_element(By.XPATH,"//button[@class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 Nc7WLe']"))
+    #     cookiesDecliner.click()
+    # except:
+    #     pass
     print(driver.title)
-    print(getMetaData(driver, url))
     scrapedData['metaData'].update(getMetaData(driver,url))
 
-    el = WebDriverWait(driver, timeout=10).until(lambda b: b.find_element(By.CLASS_NAME,"dpoVLd"))
+    el = WebDriverWait(driver, timeout=3).until(lambda b: b.find_element(By.CLASS_NAME,"dpoVLd"))
     elements = driver.find_elements(By.CLASS_NAME,"dpoVLd")
     
     for element in elements:
@@ -138,7 +138,7 @@ def scrapeWebsite(url):
     return driver.title.split(' - ')[0], scrapedData
 
 sites = []
-def getLinks(query):
+def getLinks(query, scrolls = 1):
     url = 'https://www.google.com/maps/search/' + query + '/'
     driver.get(url)
     try:
@@ -147,7 +147,7 @@ def getLinks(query):
     except:
         pass
     # resultPanel = WebDriverWait(driver, timeout=2).until(lambda b: b.find_element(By.XPATH,"//div[@class='m6QErb DxyBCb kA9KIf dS8AEf ecceSd']"))
-    for i in range(5):
+    for i in range(scrolls):
         try:
             element = WebDriverWait(driver, timeout=3).until(lambda b: b.find_element(By.XPATH,"(//a[@class='hfpxzc'])[last()]"))
             driver.execute_script("arguments[0].scrollIntoView(true);", element)
@@ -157,17 +157,23 @@ def getLinks(query):
     links = driver.find_elements(By.XPATH,"//a[@class='hfpxzc']")
     for link in links:    
         sites.append(link.get_attribute('href'))
+    return sites
         
-getLinks('restaurant koblenz')
+# getLinks('restaurant koblenz')
 
 # sites = ['https://www.google.be/maps/place/Catberry/@51.0410502,3.7226083,15z/data=!4m10!1m2!2m1!1scatberry+gent!3m6!1s0x47c371395c187645:0x69ed7cc1afaf942a!8m2!3d51.0487767!4d3.7341216!15sCg1jYXRiZXJyeSBnZW50Wg8iDWNhdGJlcnJ5IGdlbnSSAQtjb2ZmZWVfc2hvcOABAA!16s%2Fg%2F11tjld_963', 'https://maps.app.goo.gl/cGkpKnhaLvrafbBLA', 'https://maps.app.goo.gl/gfPtMmFhi1QoVprFA']
 # sites = ['https://www.google.be/maps/place/Catberry/@51.0410502,3.7226083,15z/data=!4m10!1m2!2m1!1scatberry+gent!3m6!1s0x47c371395c187645:0x69ed7cc1afaf942a!8m2!3d51.0487767!4d3.7341216!15sCg1jYXRiZXJyeSBnZW50Wg8iDWNhdGJlcnJ5IGdlbnSSAQtjb2ZmZWVfc2hvcOABAA!16s%2Fg%2F11tjld_963', ]
-for site in sites:
-    try:
-        title, data = scrapeWebsite(site)
-        totalData[''+title] = data
-        print('Done with' + title)
-    except Exception as e:
-        print(e)
-        pass
-writeJson(totalData)
+
+
+def scrapeDataFromLinks(links, amount = 5):
+		for site in sites[:amount]:
+			try:
+					title, data = scrapeWebsite(site)
+					totalData[''+title] = data
+					print('Done with' + title)
+			except Exception as e:
+					print(e)
+					pass
+		driver.quit() 
+		return totalData
+# writeJson(totalData)
