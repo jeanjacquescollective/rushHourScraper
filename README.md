@@ -30,3 +30,10 @@ uvicorn main:app --reload
 cd dashboard
 npm run start
 ```
+
+## TO DO
+- Sanitize input
+- Optimize Scraper
+- Add map feature to dashboard
+- Add combine charts to dashboard
+- Add scrollable timeline + table to dashboard
