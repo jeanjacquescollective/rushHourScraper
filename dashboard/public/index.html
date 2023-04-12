@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RushHour</title>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div class="grid-container">
+      <header class="header">
+        <div class="header__search">
+            <form action="/" method="get" id="searchForm" class="header__search__form">
+                <input type="text" name="query" id="" placeholder="Query">
+                <input type="number" name="amount" id="" placeholder="Amount">
+                <button type="submit" value="">Go!</button>
+            </form>
+        </div>
+        <!-- <div class="header__avatar">Your face</div> -->
+      </header>
+      
+        <div class="menu-icon">
+            🍔
+        </div>
+
+      <aside class="sidenav">
+        <div class="sidenav__close-icon">
+            ❌
+        </div>
+        <ul class="sidenav__list">
+          <!-- <li class="sidenav__list-item">Item One</li>
+          <li class="sidenav__list-item">Item Two</li>
+          <li class="sidenav__list-item">Item Three</li>
+          <li class="sidenav__list-item">Item Four</li>
+          <li class="sidenav__list-item">Item Five</li> -->
+        </ul>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <h1 class="main-header__heading">RushHour</h1>
+          <div class="main-header__updates">Search in the top bar so you can see how busy it is</div>
+        </div>
+        <div class="main-overview">
+            <div id="loading"></div>
+
+          <!-- <div class="overviewcard">
+            <div class="overviewcard__icon">Overview</div>
+            <div class="overviewcard__info">Card</div>
+          </div>
+          <div class="overviewcard">
+            <div class="overviewcard__icon">Overview</div>
+            <div class="overviewcard__info">Card</div>
+          </div>
+          <div class="overviewcard">
+            <div class="overviewcard__icon">Overview</div>
+            <div class="overviewcard__info">Card</div>
+          </div>
+          <div class="overviewcard">
+            <div class="overviewcard__icon">Overview</div>
+            <div class="overviewcard__info">Card</div>
+          </div>
+        </div> -->
+        <!-- <div class="main-cards" id="main-cards-holder"> 
+          <div class="card">Card</div>
+          <div class="card">Card</div>
+          <div class="card">Card</div>
+        </div> -->
+        <div class="main-charts" id="main-charts-holder">
+        </div>
+      </main>
+      <footer class="footer">
+        <div class="footer__copyright">&copy; 2022</div>
+        <div class="footer__signature">Jean-Jacques Collective</div>
+      </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script
+      src="https://kit.fontawesome.com/2c36e9b7b1.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./js/menu.js"></script>
+    <script src="./js/chart.js" type="module"></script>
+  </body>
+</html>

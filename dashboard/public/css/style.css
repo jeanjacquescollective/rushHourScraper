@@ -1,0 +1,309 @@
+/* Set the color scheme */
+:root {
+  --primary-color: #2c3e50; /* dark blue */
+  --secondary-color: #2980b9; /* blue */
+  --accent-color: #e74c3c; /* red */
+  --text-color: #fff; /* white */
+}
+
+*{
+	font-family: 'Roboto', sans-serif !important;
+  color: var(--text-color);
+}
+
+
+/* Simple dashboard grid CSS */
+
+/* Assign grid instructions to our parent grid container */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr; /* Side nav is hidden on mobile */
+    grid-template-rows: 50px 1fr 50px;
+    grid-template-areas:
+      'header'
+      'main'
+      'footer';
+    height: 100vh;
+  }
+  
+  .sidenav {
+    display: none;
+    grid-area: sidenav;
+    /* background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color)); */
+  }
+  
+  .main-cards {
+    column-count: 1;
+    column-gap: 20px;
+    margin: 20px;
+  }
+
+	.main-charts{
+			display: flex;
+			flex-wrap: wrap;
+      justify-content: center;
+	}
+  
+  /* Non-mobile styles, 750px breakpoint */
+  @media only screen and (min-width: 46.875em) {
+    /* Show the sidenav */
+    .grid-container {
+      grid-template-columns: 240px 1fr; /* Show the side nav for non-mobile screens */
+      grid-template-areas:
+        "sidenav header"
+        "sidenav main"
+        "footer footer";
+    }
+
+    .sidenav {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  /* Medium-sized screen breakpoint (tablet, 1050px) */
+  @media only screen and (min-width: 65.625em) {
+    /* Break out main cards into two columns */
+    .main-cards {
+      column-count: 2;
+    }
+  }
+  
+  /* Give every child element its grid name */
+  .header {
+    grid-area: header;
+    /* background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color)); */
+  }
+  
+  .sidenav {
+    grid-area: sidenav;
+    /* background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color)); */
+  }
+  
+  .main {
+    grid-area: main;
+    /* background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color)); */
+  }
+  
+  .footer {
+    /* grid-area: footer; */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 50px;
+    z-index: 51;
+    box-sizing: border-box;
+  }
+
+  /* Main */
+  .main-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: column;
+    padding: 20px;
+    height: 150px; /* Force our height since we don't have actual content yet */
+    background-image: url('../assets/img/hero.jpg');;
+    background-position: center;
+    background-size: cover;
+    color: var(--text-color);
+  }
+
+  .main-header__heading{
+    font-size: 2em;
+  }
+
+  .main-overview {
+    /* display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));  */
+    grid-auto-rows: 94px;
+    grid-gap: 20px;
+    margin: 20px;
+  }
+  
+  .overviewcard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #d3d3;
+  }
+
+  /* Cards */
+
+  .main-cards {
+    column-count: 2;
+    column-gap: 20px;
+    margin: 20px;
+  }
+  
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    -webkit-column-break-inside: avoid;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  /* header, footer */
+
+  .header, .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background-color: #648ca6;
+  }
+
+  /* side */
+  /* Hamburger menu icon, stays fixed on mobile for any possible scrolling */
+.menu-icon {
+    position: fixed;
+    display: flex;
+    top: 5px;
+    left: 10px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    z-index: 1;
+    cursor: pointer;
+    padding: 12px;
+    background-color: #DADAE3;
+  }
+  
+  /* Make room for the menu icon on mobile */
+  .header__search {
+    margin-left: 42px;
+  }
+  
+  /* Mobile-first side nav styles */
+  .sidenav {
+    grid-area: sidenav;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 240px;
+    position: fixed;
+    overflow-y: auto;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    z-index: 2; /* Needs to sit above the hamburger menu icon */
+    background-color: #394263;
+    transform: translateX(-245px);
+    transition: all .6s ease-in-out;
+  }
+  
+  /* The active class is toggled on hamburger and close icon clicks */
+  .sidenav.active {
+    transform: translateX(0);
+  }
+  
+  /* Only visible on mobile screens */
+  .sidenav__close-icon {
+    position: absolute;
+    visibility: visible;
+    top: 8px;
+    right: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #ddd;
+  }
+  
+  /* Non-mobile styles for side nav responsiveness, 750px breakpoint */
+  @media only screen and (min-width: 46.875em) {
+    .sidenav {
+      position: relative; /* Fixed position on mobile */
+      transform: translateX(0);
+    }
+  
+    .sidenav__close-icon {
+      visibility: hidden;
+    }
+  }
+
+  .sidenav__list {
+    padding: 0;
+    margin-top: 85px;
+    list-style-type: none;
+  }
+
+  .sidenav__list-item {
+    padding: 20px 20px 20px 40px;
+    color: #ddd;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .sidenav__list-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+  }
+
+	/* 
+	** loader
+	*/
+
+	.loader {
+		position: relative;
+		z-index: 999;
+		display: block;
+		margin: 50px auto;
+		border: 20px solid #eaf0f6;
+		border-radius: 50%;
+		border-top: 20px solid #ff7a59;
+		width: 50px;
+		height: 50px;
+		animation: spinner 4s linear infinite;
+	}
+	
+	@keyframes spinner {
+		0% {
+			transform: rotate(0deg);
+		}
+	
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+	
+
+  .hidden{
+    display: none;
+  }
+
+  input, button{
+    color:var(--primary-color)
+  }
+
+  .header__search__form{
+    display: flex;
+  }
+
+  .header__search__form input{
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--primary-color);
+    background-color: transparent;
+    padding: 0 10px;
+    margin: 0 10px;
+    height: 30px;
+    box-sizing: border-box;
+  }
+
+  .header__search__form [type="submit"]{
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 0;
+    padding: 0 10px;
+    margin: 0 10px;
+    height: 30px;
+    box-sizing: border-box;
+  }
+
+  .header__search__form [type="number"]{
+    width: 100px;
+  }
