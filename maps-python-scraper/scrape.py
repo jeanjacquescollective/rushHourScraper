@@ -6,62 +6,67 @@ import time
 from datetime import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+import uuid
 # from main import driver
 import csv
 import json
 
 
-
-def writeCSV(title,data):   
-    data['hours'].insert(0, 'days')
+def writeCSV(title, data):
+    data['collectedHours'].insert(0, 'days')
     with open('scraps/'+title + '.csv', 'w', encoding='utf-8') as csvfile:
-            fieldnames = list(data['hours'])
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for day in list(data)[1:]:
-                row = []
-                row.append(('days',day))
-                for hour in data['hours'][1:]:
-                    try: 
-                        row.append((hour, dict(data[day])[''+hour]))
-                    except KeyError:
-                        print(KeyError)
-                        row.append((hour, ''))
-                writer.writerow(dict(row))
+        fieldnames = list(data['collectedHours'])
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for day in list(data)[1:]:
+            row = []
+            row.append(('days', day))
+            for hour in data[''][1:]:
+                try:
+                    row.append((hour, dict(data[day])[''+hour]))
+                except KeyError:
+                    print(KeyError)
+                    row.append((hour, ''))
+            writer.writerow(dict(row))
 
 # Function to get day based on number
-def getDay(num):
-    print(num)
-    switch={
-        '1':'Monday',
-        '2':'Tuesday',
-        '3':'Wednesday',
-        '4':'Thursday',
-        '5':'Friday',
-        '6':'Saturday',
-        '0':'Sunday',
-        '*1':'Monday',
-        '*2':'Tuesday',
-        '*3':'Wednesday',
-        '*4':'Thursday',
-        '*5':'Friday',
-        '*6':'Saturday',
-        '*0':'Sunday'
-      }
-    return switch.get(num,"Invalid input")
 
-# sort hours 
+
+def getDay(num):
+    switch = {
+        '1': 'Monday',
+        '2': 'Tuesday',
+        '3': 'Wednesday',
+        '4': 'Thursday',
+        '5': 'Friday',
+        '6': 'Saturday',
+        '0': 'Sunday',
+        '*1': 'Monday',
+        '*2': 'Tuesday',
+        '*3': 'Wednesday',
+        '*4': 'Thursday',
+        '*5': 'Friday',
+        '*6': 'Saturday',
+        '*0': 'Sunday'
+    }
+    return switch.get(num, "Invalid input")
+
+# sort
+
+
 def sortHours(arrayToSort):
-    arrayToSort = [datetime.strptime(date,'%H:%M') for date in arrayToSort]
+    arrayToSort = [datetime.strptime(date, '%H:%M') for date in arrayToSort]
     arrayToSort.sort()
-    sortedArray =  [date.strftime('%H:%M') for date in arrayToSort]
+    sortedArray = [date.strftime('%H:%M') for date in arrayToSort]
     return sortedArray
 
 # convert string from scrape to datetime
+
+
 def convertHourToDateTime(hour):
     hour = hour.strip()
     hour = hour.replace('\u202f', ':00 ')
-    date = datetime.strptime(hour.strip(),'%H:%M')
+    date = datetime.strptime(hour.strip(), '%H:%M')
     hour = date.strftime('%H:%M')
     # try:
     #   date = datetime.strptime(hour,'%I:%M %p')
@@ -73,128 +78,166 @@ def convertHourToDateTime(hour):
     return hour
 
 # get meta data from url
+
+
 def getMetaDataFromUrl(driver, url):
-    latitude = re.search("!3d([0-9a-zA-Z.]+)!?", url).group(1)
-    longitude = re.search("!4d([0-9a-zA-Z.]+)!?", url).group(1)
-    title = driver.title.split(' - ')[0]
-    metaData = {
+    try:
+      latitude = re.search("!3d([0-9a-zA-Z.]+)!?", url).group(1)
+      longitude = re.search("!4d([0-9a-zA-Z.]+)!?", url).group(1)
+      try:
+        rating = driver.find_element(By.XPATH, "//*[contains(@class, 'F7nice')]/span[1]/span[1]").get_attribute('innerHTML')
+        print(rating)
+      except Exception as e:
+        print(e)
+        rating = ''
+      name = driver.title.split(' - ')[0]
+      metaData = {
         'coordinates': {
             'latitude': latitude,
             'longitude': longitude
         },
-        'title': title,
-        'url': url	
+        'name': name,
+        'url': url,
+        'rating': rating,
+    }
+    except Exception as e:
+      print(e)
+      print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
+      metaData = {
+        'coordinates': {
+            'latitude': '',
+            'longitude': ''
+        },
+        'name': '',
+        'url': url,
+        'rating': '',
     }
     return metaData
-
 
 
 def scrapeWebsite(driver, url):
     # instanciate data array
     scrapedData = {
-        'peakHours':{
-        'hours':[],
-        'Monday':[],
-        'Tuesday':[],
-        'Wednesday':[],
-        'Thursday':[],
-        'Friday':[],
-        'Saturday':[],
-        'Sunday':[],
+        'id': '',
+        'title': '',
+        'metaData': {
         },
-        'metaData':{
-        }
+        'relativeCrowd': {
+                'Monday': [],
+                'Tuesday': [],
+                'Wednesday': [],
+                'Thursday': [],
+                'Friday': [],
+                'Saturday': [],
+                'Sunday': [],
+        },
+
     }
     driver.get(url)
     print(driver.title)
-		# wait for elements of rush hours to load
-		# these are the bars of the rush hour table
-    WebDriverWait(driver, timeout=1).until(lambda b: b.find_element(By.CLASS_NAME,"dpoVLd"))
-    chartBars = driver.find_elements(By.CLASS_NAME,"dpoVLd")
+    # wait for elements of rush hours to load
+    # these are the bars of the rush hour table
+    WebDriverWait(driver, timeout=1).until(
+        lambda b: b.find_element(By.CLASS_NAME, "dpoVLd"))
+    chartBars = driver.find_elements(By.CLASS_NAME, "dpoVLd")
     # rewrite to start with aprent element
-    parentChartBars = chartBars[0].find_element(By.XPATH,"./../../..")
-    print(parentChartBars.get_attribute('innerHTML'))
-    allChartBars = parentChartBars.find_elements(By.XPATH,"./div")
-    print(len(allChartBars))
+    parentChartBars = chartBars[0].find_element(By.XPATH, "./../../..")
+    allChartBars = parentChartBars.find_elements(By.XPATH, "./div")
     for chartBar in chartBars:
         try:
             # get parent element of the beam
-						# aria-posinset is the day of the week
+            # aria-posinset is the day of the week
             # print(chartBar.find_element(By.XPATH,"./../../../..").get_attribute('innerHTML'))
             # chartBar.click()
             # print(chartBar.find_element(By.XPATH,"./../../../..").find_element(By.XPATH,".//div[@aria-posinset]").get_attribute("aria-posinset"))
-            parentBarChart = chartBar.find_element(By.XPATH,"./../..")
+            parentBarChart = chartBar.find_element(By.XPATH, "./../..")
             day = 0
             for count, element in enumerate(allChartBars):
-                  if(element == parentBarChart):
-                    print(count)
+                if (element == parentBarChart):
                     day = getDay(str(count))
-                    print(day)
                     break
             # day = getDay(chartBar.find_element(By.XPATH,"./../../../..").find_element(By.XPATH,".//div[@aria-posinset]").get_attribute("aria-posinset"))
-            
-						# day = getDay(chartBar.find_element(By.XPATH,"./../..").get_attribute("aria-posinset"))
+
+                    # day = getDay(chartBar.find_element(By.XPATH,"./../..").get_attribute("aria-posinset"))
             # day = getDay(element_with_date.get_attribute("aria-posinset"))
-            text    = chartBar.get_attribute('aria-label')
+            text = chartBar.get_attribute('aria-label')
             percentage = text.split('%')[0]
-            # print(text)
+            print(text)
+
             if 'at' in text.split('%')[1][-6:-1]:
                 continue
             if 'Currently' in text:
                 hour = datetime.now().strftime("%H:00")
                 percentage = text.split('%')[1][-2:]
+            elif 'Momenteel' in text:
+                hour = datetime.now().strftime("%H:00")
+                percentage = text.split('%')[1][-2:]
             else:
                 hour = convertHourToDateTime(text.split('%')[1][-6:-1])
-            if hour not in scrapedData['peakHours']['hours']:
-                scrapedData['peakHours']['hours'].append(hour) 
-            print(day, hour, percentage)
-            scrapedData['peakHours'][''+day].append((hour,percentage))
+            scrapedData['relativeCrowd'][day].append(
+                {
+                    hour: percentage
+                }
+            )
         except Exception as e:
-            print (e)
+            print(e)
             print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
             continue
-    scrapedData['peakHours']['hours'] = sortHours(scrapedData['peakHours']['hours'])
-    scrapedData['metaData'].update(getMetaDataFromUrl(driver,url))
-    scrapedData['metaData']['scrapedAt'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    scrapedData['metaData'].update({
-				'scrapedAt': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        'address': driver.find_element(By.CLASS_NAME,"Io6YTe").text,
-		})
-    return scrapedData['metaData']['title'], scrapedData
+    try:
+        # scrapedData['relativeCrowd']['collectedHours'] = sortHours(
+        #     scrapedData['relativeCrowd']['collectedHours'])
+        scrapedData['metaData'].update(getMetaDataFromUrl(driver, url))
+        scrapedData['metaData']['scrapedAt'] = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S")
+        scrapedData['metaData'].update({
+            'scrapedAt': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'address': driver.find_element(By.CLASS_NAME, "Io6YTe").text,
+        })
+        scrapedData['title'] = scrapedData['metaData']['name']
+        scrapedData['id'] = str(uuid.uuid4())
+    except Exception as e:
+        print(e)
+        print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
+        pass
+    return scrapedData['title'], scrapedData
 
 
-def getLinks(driver, query, amount = 1):
+def getLinks(driver, query, amount=1):
     sites = []
     url = 'https://www.google.com/maps/search/' + query + '/'
     driver.get(url)
-    while len(driver.find_elements(By.CLASS_NAME,"hfpxzc")) < amount:
+    while len(driver.find_elements(By.CLASS_NAME, "hfpxzc")) < amount:
         try:
-            element = WebDriverWait(driver, timeout=2).until(lambda b: b.find_element(By.XPATH,"(//a[@class='hfpxzc'])[last()]"))
-            driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            element = WebDriverWait(driver, timeout=2).until(
+                lambda b: b.find_element(By.XPATH, "(//a[@class='hfpxzc'])[last()]"))
+            driver.execute_script(
+                "arguments[0].scrollIntoView(true);", element)
         except Exception as e:
             print(e)
             pass
-    links = driver.find_elements(By.CLASS_NAME,"hfpxzc")
-    for link in links:    
+    links = driver.find_elements(By.CLASS_NAME, "hfpxzc")
+    for link in links:
         sites.append(link.get_attribute('href'))
-    print(len(sites))
     return sites
-        
-def scrapeDataFromLinks(driver, links, amount = 1):
-		totalData = {}
-		for link in links[:amount]:
-			try:
-					title, data = scrapeWebsite(driver, link)
-					totalData[''+title] = data
-					print('Done with ' + title)
-			except Exception as e:
-					print(e)
-					pass
-		# driver.close() 
-		return totalData
 
 
-def main(driver, query, amount = 1):
-	links = getLinks(driver, query, amount)
-	data = scrapeDataFromLinks(driver, links, amount)
-	return data
+def scrapeDataFromLinks(driver, links, amount=1):
+    totalData = []
+    for link in links[:amount]:
+        try:
+            title, data = scrapeWebsite(driver, link)
+            totalData.append(data)
+            print('Done with ' + title)
+        except Exception as e:
+            print(e)
+            print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
+            pass
+    # driver.close()
+    return totalData
+
+
+def main(driver, query, amount=1):
+    links = getLinks(driver, query, amount)
+    data = scrapeDataFromLinks(driver, links, amount)
+    print(data)
+    return data

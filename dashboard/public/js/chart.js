@@ -64,7 +64,7 @@ const createCharts = (poiList) => {
   let chartsList = [];
   for (let poi in poiList) {
     chartsList.push(
-      addDataToChart(poiList[poi].peakHours, poiList[poi].metaData)
+      addDataToChart(poiList[poi].relativeCrowd, poiList[poi].metaData)
     );
   }
   return chartsList;
@@ -73,9 +73,10 @@ const datasetsFromData = (data) => {
   let datasets = [];
   let index = 0;
   for (let key in data) {
+    console.log(key)
     if (key != 'hours') {
       datasets.push({
-        data: data[key].map((x) => x[1]),
+        data: data[key].map(obj => Object.values(obj)[0]),
         fill: false,
         borderColor: colors[index++],
         label: key,
@@ -86,8 +87,15 @@ const datasetsFromData = (data) => {
 };
 
 const addDataToChart = (data, metaData) => {
-  let title = metaData.title;
-  let xValues = data['hours'];
+  let title = metaData.name;
+  let xValues = [];
+  for(let day in data){
+    if(data[day].length > xValues.length){
+      console.log(data[day]);
+      xValues = data[day].map(obj => Object.keys(obj)[0]);
+      break;
+    }
+  }
   const id = createIDfromFileName(title);
   console.log(id);
   const chart = new Chart('' + id, {
@@ -125,7 +133,7 @@ const createElementsForCharts = (poiList) => {
 };
 
 const createElementForChart = (poi) => {
-  const id = createIDfromFileName(poi.metaData.title);
+  const id = createIDfromFileName(poi.metaData.name);
   const div = document.createElement('canvas');
   div.id = id;
   div.classList.add('card');
