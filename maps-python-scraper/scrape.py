@@ -1,19 +1,16 @@
 from itertools import zip_longest
 from itertools import chain
 import re
+import sys
 import time
 from datetime import datetime
-from urllib.parse import parse_qs, urlparse
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 # from main import driver
 import csv
 import json
 
-def writeJson(data):
-    with open('json/scrapedPages'+ '' + '.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+
 
 def writeCSV(title,data):   
     data['hours'].insert(0, 'days')
@@ -34,6 +31,7 @@ def writeCSV(title,data):
 
 # Function to get day based on number
 def getDay(num):
+    print(num)
     switch={
         '1':'Monday',
         '2':'Tuesday',
@@ -63,8 +61,15 @@ def sortHours(arrayToSort):
 def convertHourToDateTime(hour):
     hour = hour.strip()
     hour = hour.replace('\u202f', ':00 ')
-    date = datetime.strptime(hour,'%I:%M %p')
+    date = datetime.strptime(hour.strip(),'%H:%M')
     hour = date.strftime('%H:%M')
+    # try:
+    #   date = datetime.strptime(hour,'%I:%M %p')
+    #   hour = date.strftime('%H:%M')
+    # except ValueError:
+    #   print(hour	)
+    #   date = datetime.strptime(hour,'%H:%M')
+    #   hour = date.strftime('%H:%M')
     return hour
 
 # get meta data from url
@@ -81,6 +86,8 @@ def getMetaDataFromUrl(driver, url):
         'url': url	
     }
     return metaData
+
+
 
 def scrapeWebsite(driver, url):
     # instanciate data array
@@ -105,10 +112,29 @@ def scrapeWebsite(driver, url):
     WebDriverWait(driver, timeout=1).until(lambda b: b.find_element(By.CLASS_NAME,"dpoVLd"))
     chartBars = driver.find_elements(By.CLASS_NAME,"dpoVLd")
     # rewrite to start with aprent element
+    parentChartBars = chartBars[0].find_element(By.XPATH,"./../../..")
+    print(parentChartBars.get_attribute('innerHTML'))
+    allChartBars = parentChartBars.find_elements(By.XPATH,"./div")
+    print(len(allChartBars))
     for chartBar in chartBars:
         try:
             # get parent element of the beam
-            day = getDay(chartBar.find_element(By.XPATH,"./../..").get_attribute("jsinstance"))
+						# aria-posinset is the day of the week
+            # print(chartBar.find_element(By.XPATH,"./../../../..").get_attribute('innerHTML'))
+            # chartBar.click()
+            # print(chartBar.find_element(By.XPATH,"./../../../..").find_element(By.XPATH,".//div[@aria-posinset]").get_attribute("aria-posinset"))
+            parentBarChart = chartBar.find_element(By.XPATH,"./../..")
+            day = 0
+            for count, element in enumerate(allChartBars):
+                  if(element == parentBarChart):
+                    print(count)
+                    day = getDay(str(count))
+                    print(day)
+                    break
+            # day = getDay(chartBar.find_element(By.XPATH,"./../../../..").find_element(By.XPATH,".//div[@aria-posinset]").get_attribute("aria-posinset"))
+            
+						# day = getDay(chartBar.find_element(By.XPATH,"./../..").get_attribute("aria-posinset"))
+            # day = getDay(element_with_date.get_attribute("aria-posinset"))
             text    = chartBar.get_attribute('aria-label')
             percentage = text.split('%')[0]
             # print(text)
@@ -121,9 +147,11 @@ def scrapeWebsite(driver, url):
                 hour = convertHourToDateTime(text.split('%')[1][-6:-1])
             if hour not in scrapedData['peakHours']['hours']:
                 scrapedData['peakHours']['hours'].append(hour) 
+            print(day, hour, percentage)
             scrapedData['peakHours'][''+day].append((hour,percentage))
         except Exception as e:
             print (e)
+            print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
             continue
     scrapedData['peakHours']['hours'] = sortHours(scrapedData['peakHours']['hours'])
     scrapedData['metaData'].update(getMetaDataFromUrl(driver,url))
